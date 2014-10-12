@@ -34,7 +34,7 @@ module.exports = function(grunt) {
         options:{
           livereload: true
         },
-        files: ['main.js', 'index.html', 'main.css']
+        files: ['gpx-blogger.js', 'index.html', 'gpx-blogger.css']
       }
     }
   });

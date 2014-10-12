@@ -80,7 +80,7 @@ def loadNextImgExif(i, IMAGEDIR): # get next img metadata, returns None if all i
     except StopIteration:
         return None
     if isJpeg.match(name):
-        print name
+        #print name
         global currentName
         currentName = name
         f = open(IMAGEDIR+'/'+name, 'rb') # Open image file for reading (binary mode)
