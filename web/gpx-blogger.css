@@ -1,4 +1,7 @@
-body { margin:0; padding:0; }
+* {
+    margin: 0;
+    padding: 0;
+}
 
 .map {
 	position:absolute; 
@@ -13,4 +16,30 @@ body { margin:0; padding:0; }
 
 .next {
     float: right;
+}
+
+.mapwrapper{
+    position: relative;
+    height: 400px;
+    margin: 0;
+    border: 1px solid darkgray;
+}
+
+.mapinfo{
+    background-color: white;
+    padding: 0.5em 1em;
+    color: #404040;
+    font-family: helvetica;
+    font-size: 0.8em;
+    border-bottom: 1px solid darkgray;
+}
+
+.mapinfo ul{
+    margin-left: 0.5em;
+}
+
+.mapinfo li{
+    display: inline;
+    list-style-type: none;
+    padding: 0 0.5em;
 }

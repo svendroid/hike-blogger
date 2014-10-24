@@ -16,6 +16,8 @@ import os
 import re
 from geojson import Feature, Point, FeatureCollection, LineString
 
+import json
+
 currentName = ""
 
 DATETIMEFORMAT = '%Y:%m:%d %H:%M:%S'
@@ -27,7 +29,7 @@ def main(argv): # main method handling args input
         IMAGEDIR = os.path.abspath(__file__ + "/../../images");
         ROUTE = None
         ROUTE = os.path.abspath(__file__ + "/../../routes/Move_2014_09_30_09_15_05_Bergsteigen.gpx");
-        OUTPUT = os.path.abspath(__file__ + "/../../web/imgFeatures.json");
+        OUTPUT = os.path.abspath(__file__ + "/../../web/imgFeatures");
         opts, args = getopt.getopt(argv, "hi:o:", ["help", "imagedir=", "output="])
     except getopt.GetoptError:
         usage()
@@ -94,6 +96,31 @@ def getDateTimeOriginal(tags): # returns time picture was recorded
     orignalDateStr = tags['EXIF DateTimeOriginal'].values
     originalDate = datetime.datetime.strptime(orignalDateStr, DATETIMEFORMAT)
     return originalDate + datetime.timedelta(hours=-2) #UTC+2 used in images, all other calculations are done in UTC therfore substract 2 hours
+
+def getInfos(gpx): # creates json with infos about gpx track e.g. uphill, downhill, distance etc.
+    indentation = '   '
+    infos = {}
+    infos['uphill'], infos['downhill'] = gpx.get_uphill_downhill()
+    infos['uphill'] = round(infos['uphill'])
+    infos['downhill'] = round(infos['downhill'])
+    #print('%sTotal uphill: %sm' % (indentation, infos['uphill']))
+    #print('%sTotal downhill: %sm' % (indentation, infos['downhill']))
+    infos['length_2d'] = round(gpx.length_2d()/1000., 2)
+    infos['length_3d'] = gpx.length_3d()
+    #print('%sLength 2D: %s' % (indentation, infos['length_2d'] / 1000.))
+    #print('%sLength 3D: %s' % (indentation, infos['length_3d'] / 1000.))
+    #infos['start_time'], infos['end_time'] = gpx.get_time_bounds()
+    #print('%sStarted: %s' % (indentation, infos['start_time']))
+    #print('%sEnded: %s' % (indentation, infos['end_time']))
+
+    return infos
+
+def countImages(images):
+    length = 0
+    for image in images:
+        if isJpeg.match(image):
+            length+=1
+    return length
             
 #############################################################
 
@@ -101,11 +128,11 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT):
     images = os.listdir(IMAGEDIR)
     imgIterator = iter(images)
 
+
+
     tags = loadNextImgExif(imgIterator, IMAGEDIR)
     #printAllTags(tags)
     orignalDate = getDateTimeOriginal(tags)
-
-    
 
     try:
         gpx_file = open(ROUTE, 'r')
@@ -114,6 +141,9 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT):
         sys.exit(2)
 
     gpx = gpxpy.parse(gpx_file)
+
+    infos = getInfos(gpx)
+    infos['imageCount'] = countImages(images)
 
     featureImgs = []
     lineCoordinates = []
@@ -153,10 +183,15 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT):
 
     featureImgs.append(Feature(geometry=LineString(lineCoordinates), id="route"))
 
-    geoJson = open(OUTPUT, "w")
-    print 'write to: ', OUTPUT
+    geoJson = open(OUTPUT + '.json', "w")
+    print 'write geojson to: ', OUTPUT + 'json'
     geoJson.write(str(featureImgs))
     geoJson.close()
+
+    infosJson = open(OUTPUT + '_info.json', "w")
+    print 'write info to: ', OUTPUT + '_info.json'
+    infosJson.write(json.dumps(infos))
+    infosJson.close()
 
 if __name__ == "__main__":
     main(sys.argv[1:])
