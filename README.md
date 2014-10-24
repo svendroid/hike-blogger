@@ -2,7 +2,7 @@
 
 * Matches photos (with no gps information) to according points in a gpx-route and stores the results in a geoJson-File.
 * Displays the geoJson-File on a map
-* TODO: combine everything in a jekyll plugin or page-template that can be used to easily add a "hike post" to my blog
+* Used in my hiking blog, see https://github.com/svendroid/gipfelbuch.svenadolph.net
 
 ***
 
