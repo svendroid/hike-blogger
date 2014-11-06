@@ -4,32 +4,59 @@
     <meta charset=utf-8 />
     <title>IMG2GPX</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.2/mapbox.js'></script>
+<script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.2/mapbox.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.2/mapbox.css' rel='stylesheet' />
+<!--    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script> -->
     <script type="text/javascript" src='lib/jquery/jquery.js'></script>
     <script type="text/javascript" src="lib/underscore/underscore.js"></script>
     <link rel="stylesheet" href="font-awesome-4.2.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="gpx-blogger.css">
+    <link rel="stylesheet" type="text/css" href="css/gpx-blogger.css">
+    <link rel="stylesheet" href="css/juicyslider.css" type="text/css" />
+    <script type="text/javascript" src="juicyslider.js"></script>
 </head>
 <body>
-    <div class="mapinfo">
-        <ul>
-            <li><i class="fa fa-caret-up"></i> <span title="Aufstieg" id="uphill"></span></li>
-            <li><i class="fa fa-caret-down"></i> <span title="Abstieg" id="downhill"></span></li>
-            <li><i class="fa fa-camera-retro"></i> <span title="Anzahl Bilder" id="imageCount">100</span></li>
-            <li><i class="fa fa-road"></i> <span title="Strecke" id="distance">15,35 km</span></li>
-            <li><i class="fa fa-play"></i> <span title="Play" id="distance">Play</span></li>
-        </ul>
-    </div>
 	<div class="mapwrapper">
+        <div id="mapinfo" class="mapinfo collapsed">
+            <!-- infos & buttons -->
+            <ul class="sidebar-tabs">
+                <li>
+                    <strong>Nagelfluhkette 08.08.2014</strong>
+                </li><li>
+                    <i class="fa fa-caret-up"></i> <span title="Aufstieg" id="uphill"></span>
+                </li><li>
+                    <i class="fa fa-caret-down"></i> <span title="Abstieg" id="downhill"></span>
+                </li><li>
+                    <i class="fa fa-road"></i> <span title="Strecke" id="distance">15,35 km</span>
+                </li><li>
+                    <a title="Beschreibung" href="#description"><i class="fa fa fa-file-text-o"></i></a>
+                </li><li>
+                    <a title="Bilder" href="#images"><i class="fa fa-camera-retro"></i></a>
+                </li>
+            </ul>
+            <!-- content tabs -->
+            <div class="sidebar-content">
+                <div class="sidebar-pane" id="description">
+                    <h1>Wanderung</h1>
+                    <p>Ganz viel Beschreibung</p>
+                </div>
+                <div class="sidebar-pane" id="images">
+                    <h1>Bilder</h1>
+                    <p>Ganz viele Bilder</p>
+                </div>
+            </div>
+        </div><!-- mapinfo end -->
         <div id='test' class='map'></div>
     </div>
-    <script src='lib/Leaflet.fullscreen/Leaflet.fullscreen.min.js'></script>
+    <script src='lib/Leaflet.fullscreen/Leaflet.fullscreen.js'></script>
     <link href='lib/Leaflet.fullscreen/leaflet.fullscreen.css' rel='stylesheet' />
+    <script src="lib/sidebar-v2/leaflet-sidebar.js"></script>
 	<script type="text/javascript" src='gpx-blogger.js'></script>
     <script type="text/javascript">
         var map = new GPXMap('test', 'imgFeatures.json', null);
         map.show();
+
+        var sidebar = L.control.sidebar('mapinfo').addTo(map);
 
         $.getJSON('imgFeatures_info.json', function(routeinfo){
             console.log(routeinfo);
@@ -39,5 +66,6 @@
             $('#imageCount').text(routeinfo.imageCount);
         });
     </script>
+
 </body>
 </html>

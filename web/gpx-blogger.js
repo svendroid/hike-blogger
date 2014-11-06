@@ -8,13 +8,22 @@ var GPXMap = function(mapid, geoJson, imagedir){
 
 GPXMap.prototype = {
     show: function(){
-        L.mapbox.accessToken = 'pk.eyJ1Ijoic3ZlbmRyb2lkIiwiYSI6Ii1kZ1g4cUEifQ.rBi__YNLLxPZwO0npRZQSQ'; //TODO use own access token
+        /*L.mapbox.accessToken = 'pk.eyJ1Ijoic3ZlbmRyb2lkIiwiYSI6Ii1kZ1g4cUEifQ.rBi__YNLLxPZwO0npRZQSQ'; //TODO use own access token
         this.map = L.mapbox.map(this.mapid, 'svendroid.j8miiopo', {
         													    closePopupOnClick: true,
-        													    fullscreenControl: true,
-                                                                keyboard: false,
-                                                                fullscreenControl: true
-        													});
+        													    keyboard: false,
+                                                                fullscreenControl: true,
+                                                                fullscreenControlOptions: {
+                                                                    position: 'bottomright'
+                                                                },
+                                                                zoomControl: false
+        													});*/
+
+        this.map = L.map(this.mapid, {zoomControl: false}).setView([51.505, -0.09], 13);
+
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}).addTo(this.map);
+
+        new L.Control.Zoom({ position: 'bottomright' }).addTo(this.map);
 
         if(this.geoJson == null){
             this.geoJson = 'imgFeatures.json';
@@ -25,11 +34,11 @@ GPXMap.prototype = {
             console.log('using default imagedir: ' + this.imagedir);
         }
 
-        this.myLayer = L.mapbox.featureLayer().addTo(this.map);
+        this.myLayer = L.geoJson().addTo(this.map);
         var that = this;  	
         jQuery.get(this.geoJson, function(geoJson){
         	// Add features to the map
-        	that.myLayer.setGeoJSON(geoJson);
+        	that.myLayer.addData(geoJson);
 
         	var route = _.findWhere(geoJson, {id: "route"})
         	if(route !== undefined){
@@ -47,9 +56,7 @@ GPXMap.prototype = {
             var layers = that.myLayer.getLayers();
            
             if(feature.geometry.type === 'Point'){ //style points
-                marker.setIcon(L.mapbox.marker.icon({
-                                'marker-color': '#f95020'
-                                }));
+                //marker.setIcon(L.Icon.Default);
 
                 marker.on('click', function(e){
                     var layers = that.myLayer.getLayers();
@@ -118,8 +125,13 @@ GPXMap.prototype = {
 
     addPopup: function(marker, first, last){
         // Create custom popup content
-        var popupContent = '<img src="' + this.imagedir + marker.feature.properties.title+'" width="300px" >'+
+        var popupContent = '<img src="' + this.imagedir + marker.feature.properties.title+'" width="340px" >'+
                             '<div class="nav">' +
+                                (first ? '' : '<a href="#" class="prev">&laquo; Vorheriges</a>') +
+                                (last ? '' : '<a href="#" class="next">Nächstes &raquo;</a>') +
+                                '</div>';
+
+        var popupContentNew = '<div style="background-image: url(' + this.imagedir + marker.feature.properties.title + ')" class="imagepopup"></div><div class="nav">' +
                                 (first ? '' : '<a href="#" class="prev">&laquo; Vorheriges</a>') +
                                 (last ? '' : '<a href="#" class="next">Nächstes &raquo;</a>') +
                                 '</div>';
@@ -127,7 +139,7 @@ GPXMap.prototype = {
         // http://leafletjs.com/reference.html#popup
         marker.bindPopup(popupContent,{
             closeButton: false,
-            minWidth: 320,
+            minWidth: 360,
             autoPan: false //centering popup in panToCenterOfPopup by myself
         });
 
@@ -179,6 +191,7 @@ GPXMap.prototype = {
     panToCenterOfPopup: function(popup){
         //pan to center of popup - http://stackoverflow.com/questions/22538473/leaflet-center-popup-and-marker-to-the-map
         var px = this.map.project(popup._latlng);
+        console.log(popup);
         px.y -= popup._container.clientHeight/2;
         this.map.panTo(this.map.unproject(px),{animate: true});
     }
