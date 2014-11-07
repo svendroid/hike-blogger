@@ -26,11 +26,12 @@ isJpeg = re.compile(".*\.(jpeg|jpg)", re.IGNORECASE)
 
 def main(argv): # main method handling args input
     try:
-        IMAGEDIR = os.path.abspath(__file__ + "/../../images");
+        IMAGEDIR = os.path.abspath(__file__ + "/../../images")
         ROUTE = None
         ROUTE = os.path.abspath(__file__ + "/../../routes/Move_2014_09_30_09_15_05_Bergsteigen.gpx");
-        OUTPUT = os.path.abspath(__file__ + "/../../web/imgFeatures");
-        opts, args = getopt.getopt(argv, "hi:o:", ["help", "imagedir=", "output="])
+        OUTPUT = os.path.abspath(__file__ + "/../../web/imgFeatures.json")
+        OUTPUTINFO = os.path.abspath(__file__ + "/../../web/info.json")
+        opts, args = getopt.getopt(argv, "hi:o:s:", ["help", "imagedir=", "output=", "outputinfo="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -42,6 +43,8 @@ def main(argv): # main method handling args input
             IMAGEDIR = arg
         elif opt in ("-o", "--output"):
             OUTPUT = arg
+        elif opt in ("-s", "--outputinfo"):
+            OUTPUTINFO = arg
 
     if(len(args) >= 1): #args contains not used arg 
         #print 'REMAINING args: ', args
@@ -51,16 +54,17 @@ def main(argv): # main method handling args input
         usage()
         sys.exit(2)
 
-    generateGeoJson(IMAGEDIR, ROUTE, OUTPUT)
+    generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO)
 
 #####################
 
 def usage(): #explains usage of script
     print """    usage: generateGeoJsonFromGPX.py [-options] file
     options:
-        [-h | --help]      : displays this help message
-        [-i | --imagedir=] : directory containing images, default: images
-        [-o | --output=]   : output file, default: route.json
+        [-h | --help]         : displays this help message
+        [-i | --imagedir=]    : directory containing images, default: images
+        [-o | --output=]      : output file, default: route.json
+        [-io | --outputinfo=] : output info file, default: info.json
         file                 input file e.g. route.gpx
     """
     
@@ -101,12 +105,12 @@ def getInfos(gpx): # creates json with infos about gpx track e.g. uphill, downhi
     indentation = '   '
     infos = {}
     infos['uphill'], infos['downhill'] = gpx.get_uphill_downhill()
-    infos['uphill'] = round(infos['uphill'])
-    infos['downhill'] = round(infos['downhill'])
+    infos['uphill'] = int(round(infos['uphill']))
+    infos['downhill'] = int(round(infos['downhill']))
     #print('%sTotal uphill: %sm' % (indentation, infos['uphill']))
     #print('%sTotal downhill: %sm' % (indentation, infos['downhill']))
     infos['length_2d'] = round(gpx.length_2d()/1000., 2)
-    infos['length_3d'] = gpx.length_3d()
+    infos['length_3d'] = round(gpx.length_3d()/1000., 2)
     #print('%sLength 2D: %s' % (indentation, infos['length_2d'] / 1000.))
     #print('%sLength 3D: %s' % (indentation, infos['length_3d'] / 1000.))
     #infos['start_time'], infos['end_time'] = gpx.get_time_bounds()
@@ -124,7 +128,7 @@ def countImages(images):
             
 #############################################################
 
-def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT):
+def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO):
     images = os.listdir(IMAGEDIR)
     imgIterator = iter(images)
 
@@ -183,13 +187,13 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT):
 
     featureImgs.append(Feature(geometry=LineString(lineCoordinates), id="route"))
 
-    geoJson = open(OUTPUT + '.json', "w")
-    print 'write geojson to: ', OUTPUT + 'json'
+    geoJson = open(OUTPUT, "w")
+    print 'write geojson to: ', OUTPUT
     geoJson.write(str(featureImgs))
     geoJson.close()
 
-    infosJson = open(OUTPUT + '_info.json', "w")
-    print 'write info to: ', OUTPUT + '_info.json'
+    infosJson = open(OUTPUTINFO, "w")
+    print 'write info to: ', OUTPUTINFO
     infosJson.write(json.dumps(infos))
     infosJson.close()
 
