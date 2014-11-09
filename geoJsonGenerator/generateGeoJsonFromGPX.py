@@ -118,13 +118,6 @@ def getInfos(gpx): # creates json with infos about gpx track e.g. uphill, downhi
     #print('%sEnded: %s' % (indentation, infos['end_time']))
 
     return infos
-
-def countImages(images):
-    length = 0
-    for image in images:
-        if isJpeg.match(image):
-            length+=1
-    return length
             
 #############################################################
 
@@ -147,7 +140,7 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO):
     gpx = gpxpy.parse(gpx_file)
 
     infos = getInfos(gpx)
-    infos['imageCount'] = countImages(images)
+    infos['imageCount'] = 0
 
     featureImgs = []
     lineCoordinates = []
@@ -169,6 +162,7 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO):
                         props['title'] = currentName
 
                         featureImgs.append(Feature(geometry=Point((point.longitude, point.latitude)), properties=props))
+                        infos['imageCount'] += 1
                         #update next img
                         tags = loadNextImgExif(imgIterator, IMAGEDIR)
                         if(tags != None):
