@@ -159,7 +159,7 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO):
                         #print 'Image-Time: ' + orignalDate.strftime(DATETIMEFORMAT)
                         #print '***'
                         props = {}
-                        props['title'] = currentName
+                        props['filename'] = currentName
 
                         featureImgs.append(Feature(geometry=Point((point.longitude, point.latitude)), properties=props))
                         infos['imageCount'] += 1

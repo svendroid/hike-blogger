@@ -64,7 +64,7 @@ GPXMap.prototype = {
                 marker.on('click', function(e){                                        
                     var layers = that.myLayer.getLayers();
                     _.find(layers, function(marker, index){ //find currentImgIndex
-                        if(marker.feature.properties.title === e.target.feature.properties.title){
+                        if(marker.feature.properties.filename === e.target.feature.properties.filename){
                             that.currentImg = index;
                             return true;
                         }
@@ -136,13 +136,12 @@ GPXMap.prototype = {
 
     addPopup: function(marker, first, last){
         // Create custom popup content
-        var popupContent = '<img src="' + this.imagedir + marker.feature.properties.title+'" width="340px" >'+
-                            '<div class="nav">' +
-                                (first ? '' : '<a href="#" class="prev">&laquo; Vorheriges</a>') +
-                                (last ? '' : '<a href="#" class="next">Nächstes &raquo;</a>') +
-                                '</div>';
+        var imagePath = this.imagedir + marker.feature.properties.filename;
+        var imagePathThumb = this.insertBeforeLastDot(imagePath, '_thumb');
 
-        var popupContentNew = '<div style="background-image: url(' + this.imagedir + marker.feature.properties.title + ')" class="imagepopup"></div><div class="nav">' +
+        console.log(marker.feature.properties.filename);
+        var popupContent = '<a href="' + imagePath + '"><img src="' + imagePath +'" width="340px" ></a>'+
+                            '<div class="nav">' +
                                 (first ? '' : '<a href="#" class="prev">&laquo; Vorheriges</a>') +
                                 (last ? '' : '<a href="#" class="next">Nächstes &raquo;</a>') +
                                 '</div>';
@@ -153,8 +152,15 @@ GPXMap.prototype = {
             minWidth: 360,
             autoPan: false //centering popup in panToCenterOfPopup by myself
         });
+    },
 
-
+    //insert a string between filename and fileextension
+    insertBeforeLastDot: function(str, insertstr){
+        index = str.lastIndexOf('.')
+        if(index == -1){
+            return str;
+        }
+        return str.slice(0, index) + insertstr + str.slice(index);
     },
 
     //get bounding box of a route, so the whole route is in sight
