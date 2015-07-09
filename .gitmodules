@@ -1,4 +1,4 @@
 [submodule "geoJsonGenerator/gpxpy"]
 	path = geoJsonGenerator/gpxpy
-	url = https://github.com/tkrajina/gpxpy.git
-	branch = gpx-1.1
+	url = https://github.com/svendroid/gpxpy.git
+	branch = hard_elevations

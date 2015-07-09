@@ -68,19 +68,22 @@ def usage(): #explains usage of script
         file                 input file e.g. route.gpx
     """
     
-def previous_and_next(some_iterable): # helper method to get a prev and next item in loop
+def previous_and_next(some_iterable): 
+    # helper method to get a prev and next item in loop
     prevs, items, nexts = tee(some_iterable, 3)
     prevs = chain([None], prevs)
     nexts = chain(islice(nexts, 1, None), [None])
     return izip(prevs, items, nexts)
 
-def printAllTags(tags): # print all img tags except the ones known for long, gibberish content
+def printAllTags(tags): 
+    # print all img tags except the ones known for long, gibberish content
     print 'EXIF information:'
     for tag in tags.keys():
         if tag not in ('JPEGThumbnail', 'TIFFThumbnail', 'Filename', 'EXIF MakerNote'):
             print "Key: %s, value %s" % (tag, tags[tag])
 
-def loadNextImgExif(i, IMAGEDIR): # get next img metadata, returns None if all images have been checked
+def loadNextImgExif(i, IMAGEDIR):
+    # get next img metadata, returns None if all images have been checked
     try:
         name = i.next()
     except StopIteration:
@@ -96,12 +99,14 @@ def loadNextImgExif(i, IMAGEDIR): # get next img metadata, returns None if all i
     else:
         return loadNextImgExif(i, IMAGEDIR)
 
-def getDateTimeOriginal(tags): # returns time picture was recorded
+def getDateTimeOriginal(tags): 
+    # returns time picture was recorded
     orignalDateStr = tags['EXIF DateTimeOriginal'].values
     originalDate = datetime.datetime.strptime(orignalDateStr, DATETIMEFORMAT)
     return originalDate + datetime.timedelta(hours=-2) #UTC+2 used in images, all other calculations are done in UTC therfore substract 2 hours
 
-def getInfos(gpx): # creates json with infos about gpx track e.g. uphill, downhill, distance etc.
+def getInfos(gpx): 
+    # creates json with infos about gpx track e.g. uphill, downhill, distance etc.
     indentation = '   '
     infos = {}
     infos['uphill'], infos['downhill'] = gpx.get_uphill_downhill()
@@ -122,13 +127,14 @@ def getInfos(gpx): # creates json with infos about gpx track e.g. uphill, downhi
 #############################################################
 
 def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO):
+    print("imageDir: ", IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO)
+
     images = os.listdir(IMAGEDIR)
     imgIterator = iter(images)
 
-
-
     tags = loadNextImgExif(imgIterator, IMAGEDIR)
-    #printAllTags(tags)
+
+    printAllTags(tags)
     orignalDate = getDateTimeOriginal(tags)
 
     try:
@@ -155,9 +161,9 @@ def generateGeoJson(IMAGEDIR, ROUTE, OUTPUT, OUTPUTINFO):
 
                     if nxt != None and orignalDate >= point.time and orignalDate < nxt.time:
                         #addPointAndImg to json array
-                        #print 'Point-Time: ' + point.time.strftime(DATETIMEFORMAT)
-                        #print 'Image-Time: ' + orignalDate.strftime(DATETIMEFORMAT)
-                        #print '***'
+                        print 'Point-Time: ' + point.time.strftime(DATETIMEFORMAT)
+                        print 'Image-Time: ' + orignalDate.strftime(DATETIMEFORMAT)
+                        print '***'
                         props = {}
                         props['filename'] = currentName
 
